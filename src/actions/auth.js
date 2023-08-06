@@ -137,7 +137,7 @@ export const verify = (uid, token) => async dispatch => {
     };
     const body = JSON.stringify({ uid, token });
     try {
-        const res = await axios.post(REACT_API_BASE_URL + `auth/users/activation/`, body, config);
+        await axios.post(REACT_API_BASE_URL + `auth/users/activation/`, body, config);
         dispatch({
             type: ACTIVATION_SUCCESS,
         });
@@ -158,7 +158,7 @@ export const password_reset = (email) => async dispatch => {
     };
     const body = JSON.stringify({ email });
     try {
-        const res = await axios.post(REACT_API_BASE_URL + `auth/users/reset_password/`, body, config);
+        await axios.post(REACT_API_BASE_URL + `auth/users/reset_password/`, body, config);
         dispatch({
             type: PASSWORD_RESET_SUCCESS,
         });
@@ -179,7 +179,7 @@ export const password_reset_confirm = (uid, token, new_password, re_new_password
     };
     const body = JSON.stringify({ uid, token, new_password, re_new_password });
     try {
-        const res = await axios.post(REACT_API_BASE_URL + `auth/users/reset_password_confirm/`, body, config);
+        await axios.post(REACT_API_BASE_URL + `auth/users/reset_password_confirm/`, body, config);
         dispatch({
             type: PASSWORD_RESET_CONFIRM_SUCCESS,
         });
