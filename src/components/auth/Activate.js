@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { connect } from 'react-redux';
 import { verify } from '../../actions/auth';
@@ -30,7 +30,6 @@ const defaultTheme = createTheme();
 
 const Activate = ({ verify }) => {
 
-  const navigate = useNavigate();
   const params = useParams();
   const [verified, setVerified] = useState(false);
 

@@ -40,7 +40,6 @@ const Login = ({ login, load_user }) => {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [loggedIn, setLoggedIn] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('');
 
 
   const [email, setEmail] = useState('');
@@ -72,7 +71,6 @@ const Login = ({ login, load_user }) => {
     if (validEmail === true && validPassword === true) {
       login(email, password);
       setLoggedIn(true);
-      setSuccessMsg('Login Successful');
       setEmail('');
       setPassword('');
       return navigate("/dashboard/")
