@@ -9,7 +9,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import { USERS_API_BASE_URL } from '../../../actions/types';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -18,17 +17,9 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 export default function UpdateProfilleModal() {
 
-    const navigate = useNavigate();
     const [open, setOpen] = React.useState(false);
 
-    const initialFormData = Object.freeze({
-        programme: '',
-        contact: '',
-        about: '',
-        picture: ''
-    })
 
-    const [formInput, setFormInput] = React.useState(initialFormData);
     const [picture, setPicture] = React.useState(null);
 
     const [query, setQuery] = React.useState({
@@ -36,13 +27,13 @@ export default function UpdateProfilleModal() {
         contact: "",
         about: "",
         picture: ""
-      })
-    
-      const handleUpdateChange = async (e) => {
+    })
+
+    const handleUpdateChange = async (e) => {
         const queryClone = { ...query };
         queryClone[e.target.name] = e.target.value;
         setQuery(queryClone)
-      }
+    }
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -66,11 +57,11 @@ export default function UpdateProfilleModal() {
             about: query.about,
             picture: picture[0]
         }
-        const res = await axios.put(USERS_API_BASE_URL + `updateProfile/`, userData, config)
+        await axios.put(USERS_API_BASE_URL + `updateProfile/`, userData, config)
             .then(res => res.data)
             .catch(err => console.log(err))
         handleClose();
-        
+
     }
 
     React.useEffect(() => {

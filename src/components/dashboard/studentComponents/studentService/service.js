@@ -10,9 +10,9 @@ export const checkCurrentStatus = async () => {
                 "accept": "application/json"
             }
         };
-        await axios.get(USERS_API_BASE_URL+`getUser/`, config)
-        .then(res => localStorage.setItem("details", res.data))
-        .catch(err => console.log(err))
+        await axios.get(USERS_API_BASE_URL + `getUser/`, config)
+            .then(res => localStorage.setItem("details", res.data))
+            .catch(err => console.log(err))
     }
 };
 
@@ -25,10 +25,10 @@ export const add_student_semester_courses = async (courseName, courseCode, credi
             "accept": "application/json"
         }
     };
-    const body = JSON.stringify({courseName, courseCode, creditHours, lecturerID});
-    const res = await axios.post(STUDENTS_API_BASE_URL+`addSemesterCourses/`, body, config)
-    .then(res => res.data)
-    .catch(err => console.log(err))
+    const body = JSON.stringify({ courseName, courseCode, creditHours, lecturerID });
+    await axios.post(STUDENTS_API_BASE_URL + `addSemesterCourses/`, body, config)
+        .then(res => res.data)
+        .catch(err => console.log(err))
 }
 
 
@@ -40,10 +40,10 @@ export const update_sudent_courses = async (id, courseName, courseCode, creditHo
             "accept": "application/json"
         }
     };
-    const body = JSON.stringify({courseName, courseCode, creditHours, lecturerID});
-    const res = await axios.put(STUDENTS_API_BASE_URL+`updateSemesterCourses/${id}/`, body, config)
-    .then(res => res.data)
-    .catch(err => console.log(err))
+    const body = JSON.stringify({ courseName, courseCode, creditHours, lecturerID });
+    await axios.put(STUDENTS_API_BASE_URL + `updateSemesterCourses/${id}/`, body, config)
+        .then(res => res.data)
+        .catch(err => console.log(err))
 }
 
 export const delete_student_course = async (id) => {
@@ -54,7 +54,7 @@ export const delete_student_course = async (id) => {
             "accept": "application/json"
         }
     };
-    await axios.delete(STUDENTS_API_BASE_URL+`deleteCourse/${id}`, config)
-    .then(res => res.code)
-    .catch(err => console.log(err))
+    await axios.delete(STUDENTS_API_BASE_URL + `deleteCourse/${id}`, config)
+        .then(res => res.code)
+        .catch(err => console.log(err))
 }

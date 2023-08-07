@@ -20,7 +20,6 @@ export default function UpdateCourse() {
 
   const navigate = useNavigate();
   const params = useParams();
-  const [errors, setErrors] = React.useState({});
 
   const [query, setQuery] = React.useState({
     courseName: "",

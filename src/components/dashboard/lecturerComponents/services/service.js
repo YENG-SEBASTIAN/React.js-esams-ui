@@ -10,9 +10,9 @@ export const checkCurrentStatus = async () => {
                 "accept": "application/json"
             }
         };
-        await axios.get(USERS_API_BASE_URL+`getUser/`, config)
-        .then(res => localStorage.setItem("details", res.data))
-        .catch(err => console.log(err))
+        await axios.get(USERS_API_BASE_URL + `getUser/`, config)
+            .then(res => localStorage.setItem("details", res.data))
+            .catch(err => console.log(err))
     }
 };
 
@@ -25,14 +25,14 @@ export const add_lecturer_semester_courses = async (level, className, courseCode
             "accept": "application/json"
         }
     };
-    const body = JSON.stringify({level, className, courseCode, courseName, creditHours});
-    const res = await axios.post(LECTURERS_API_BASE_URL+`lecturerAddSemesterCourse/`, body, config)
-    .then(res => res.data)
-    .catch(err => console.log(err))
+    const body = JSON.stringify({ level, className, courseCode, courseName, creditHours });
+    await axios.post(LECTURERS_API_BASE_URL + `lecturerAddSemesterCourse/`, body, config)
+        .then(res => res.data)
+        .catch(err => console.log(err))
 }
 
 
-export const update_lecture_courses = async (id, level, className, courseCode, courseName, creditHours ) => {
+export const update_lecture_courses = async (id, level, className, courseCode, courseName, creditHours) => {
     const config = {
         headers: {
             "Content-Type": "application/json",
@@ -40,10 +40,10 @@ export const update_lecture_courses = async (id, level, className, courseCode, c
             "accept": "application/json"
         }
     };
-    const body = JSON.stringify({level, className, courseCode, courseName, creditHours });
-    const res = await axios.put(LECTURERS_API_BASE_URL+`lecturerUpdateSemesterCourse/${id}/`, body, config)
-    .then(res => res.data)
-    .catch(err => console.log(err))
+    const body = JSON.stringify({ level, className, courseCode, courseName, creditHours });
+    await axios.put(LECTURERS_API_BASE_URL + `lecturerUpdateSemesterCourse/${id}/`, body, config)
+        .then(res => res.data)
+        .catch(err => console.log(err))
 }
 
 export const delete_lecturer_course = async (id) => {
@@ -54,9 +54,9 @@ export const delete_lecturer_course = async (id) => {
             "accept": "application/json"
         }
     };
-    await axios.delete(LECTURERS_API_BASE_URL+`lecturerDeleteSemesterCourse/${id}`, config)
-    .then(res => res.code)
-    .catch(err => console.log(err))
+    await axios.delete(LECTURERS_API_BASE_URL + `lecturerDeleteSemesterCourse/${id}`, config)
+        .then(res => res.code)
+        .catch(err => console.log(err))
 }
 
 
@@ -68,8 +68,8 @@ export const invigilator_add_courses = async (courseCode, courseName) => {
             "accept": "application/json"
         }
     };
-    const body = JSON.stringify({courseCode, courseName});
-    const res = await axios.post(LECTURERS_API_BASE_URL+`invigilatorAddCourse/`, body, config)
-    .then(res => res.data)
-    .catch(err => console.log(err))
+    const body = JSON.stringify({ courseCode, courseName });
+    await axios.post(LECTURERS_API_BASE_URL + `invigilatorAddCourse/`, body, config)
+        .then(res => res.data)
+        .catch(err => console.log(err))
 }

@@ -8,8 +8,6 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Title from '../dashboard/Title';
-import axios from 'axios';
-import { STUDENTS_API_BASE_URL } from '../../../actions/types';
 import validation from '../../auth/validation/validation';
 import { add_student_semester_courses } from './studentService/service';
 import { useNavigate } from 'react-router-dom';

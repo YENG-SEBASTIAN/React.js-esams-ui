@@ -9,7 +9,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import { USERS_API_BASE_URL } from '../../../actions/types';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -18,7 +17,6 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 export default function SetProfileModal() {
 
-    const navigate = useNavigate();
     const [open, setOpen] = React.useState(false);
 
     const initialFormData = Object.freeze({
@@ -67,7 +65,7 @@ export default function SetProfileModal() {
             about: formInput.about,
             picture: picture[0]
         }
-        const res = await axios.post(USERS_API_BASE_URL + `setProfile/`, userData, config)
+        await axios.post(USERS_API_BASE_URL + `setProfile/`, userData, config)
             .then(res => res.data)
             .catch(err => console.log(err))
 
