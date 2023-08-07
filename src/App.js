@@ -6,6 +6,8 @@ import Activate from './components/auth/Activate';
 import ResetPassword from './components/auth/ResetPassword';
 import ResetPasswordConfirm from './components/auth/ResetPasswordConfirm';
 import Layout from './components/layout/Layout';
+import NotFound from './components/dashboard/NotFound';
+import Dashboard from './components/dashboard/dashboard/Dashboard';
 
 
 function App() {
@@ -22,8 +24,8 @@ function App() {
 
 
         {/* protected routes */}
-        {/* <Route path='/dashboard/*' exact element={<Dashboard />} /> */}
-        {/* <Route path='*' exact element={<NotFound />} /> */}
+        <Route path='/dashboard/*' exact element={<Dashboard />} />
+        <Route path='*' exact element={<NotFound />} />
 
       </Routes>
     </Layout>

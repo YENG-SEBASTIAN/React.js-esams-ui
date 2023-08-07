@@ -7,6 +7,10 @@ const Layout = (props) => {
   useEffect(() => {
     props.checkAuthenticated();
     props.load_user();
+
+    if(!props.checkAuthenticated){
+      return window.location.href = "/"
+    }
   })
   return (
     <div>

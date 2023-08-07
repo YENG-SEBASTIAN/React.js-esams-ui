@@ -1,0 +1,9 @@
+.videoCapture{
+    display: flex;
+    align-items: center;
+}
+
+canvas{
+    position: absolute;
+    top: 10rem;
+}
