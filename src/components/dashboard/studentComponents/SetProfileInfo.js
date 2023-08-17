@@ -21,8 +21,9 @@ export default function SetProfileModal() {
 
     const initialFormData = Object.freeze({
         programme: '',
-        contact: '',
+        level: '',
         about: '',
+        contact: '',
         picture: ''
     })
 
@@ -30,11 +31,6 @@ export default function SetProfileModal() {
     const [picture, setPicture] = React.useState(null);
 
     const handleChange = (e) => {
-        // if ([e.target.name] === 'picture') {
-        //     setPicture({
-        //         picture: e.target.files,
-        //     })
-        // }
 
         const { name, value } = e.target;
         setFormInput({

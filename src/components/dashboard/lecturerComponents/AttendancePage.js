@@ -26,27 +26,51 @@ export default function AttendancePage() {
   const canvasRef = useRef(null);
   const videoHight = 440;
   const videoWidth = 600;
+  const [profile, setProfile] = React.useState([]);
+
+
+  const userProfileInfo = async () => {
+    const config = {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        "Authorization": `JWT ${localStorage.getItem("access")}`,
+      }
+    };
+    await axios.get(USERS_API_BASE_URL + `get_all_userProfileInfo/`, config)
+      .then(res => setProfile(res.data))
+  }
 
   useEffect(() => {
     startVideo();
-
+    getLabelFaceDescriptor();
     videoRef && loadModels();
   }, []);
+
+  React.useEffect(() => {
+    userProfileInfo()
+  }, [])
 
   const startVideo = () => {
     navigator.mediaDevices.getUserMedia({ video: true })
       .then((currentStream) => {
         videoRef.current.srcObject = currentStream;
-        // return () => {
-        //   if (currentStream) {
-        //     currentStream.getTracks().forEach((track) => track.stop());
-        //     console.log(currentStream)
-        //   }
-        // };
-      }).catch((err) => {
+      
+      })
+      .catch((err) => {
         console.error(err)
       });
   }
+
+  const stopStream = () => {
+    const stream = videoRef.current.srcObject;
+    if (stream) {
+      const tracks = stream.getTracks();
+      tracks.forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    return window.location.href = "/dashboard/dashboard";
+  };
+
 
   const loadModels = () => {
     setInitializing(true);
@@ -61,13 +85,18 @@ export default function AttendancePage() {
   };
 
   const faceDetection = async () => {
+    const loadFaceDescriptors = await getLabelFaceDescriptor();
+    const faceMatcher = faceapi.FaceMatcher(loadFaceDescriptors)
+
+
     setInterval(async () => {
-      if (initializing) {
-        setInitializing(false);
-      }
+
       const detections = await faceapi.detectAllFaces
         (videoRef.current, new faceapi.TinyFaceDetectorOptions())
         .withFaceLandmarks().withFaceDescriptors().withFaceExpressions();
+        if (detections) {
+          setInitializing(false);
+        }
       // console.log(detections)
 
       canvasRef.current.innerHtml = faceapi.createCanvasFromMedia(videoRef.current);
@@ -86,20 +115,90 @@ export default function AttendancePage() {
       //to analyze and output the current expression by the detected face
       faceapi.draw.drawFaceExpressions(canvasRef.current, resized);
 
+      const results = resized.map((d) => {
+        return faceMatcher.findBestMatch(d.descriptor);
+      })
+      results.forEach((result, i) => {
+        const box = resized[i].detection.box;
+        const drawBox = new faceapi.draw.DrawBox(box, {label: result});
+        drawBox.draw(canvasRef.current)
+      })
+
       if (detections && detections.length > 0) {
+
+
         const faceDescriptor = detections[0].descriptor;
-        // const response = await axios.post('/api/compare_faces/', {
-        //   encoding: faceDescriptor,
-        // });
-        // console.log(response.data);
-        console.log(faceDescriptor);
+        const faceEncoding = JSON.stringify(faceDescriptor);
+        const faceParse = JSON.parse(faceEncoding);
+        const valuesArray = Object.values(faceParse);
+        console.log("valuesArray", valuesArray)
+        // sendFaceDescriptorToBackend(valuesArray)
+
       }
-      requestAnimationFrame(faceDetection);
 
     }, 1000)
   }
 
+  const sendFaceDescriptorToBackend = async (faceDescriptor) => {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `JWT ${localStorage.getItem("access")}`
+      }
+    };
+    try {
+      const response = await axios.post(
+        USERS_API_BASE_URL + `compare_faces_api/`,
+        {
+          encoding: faceDescriptor, // Assuming 'faceDescriptor' is the 128-dimensional descriptor
+        },
+        config
+      );
+      console.log(response)
+      console.log(faceDescriptor); // Server response message
+    } catch (error) {
+      console.error('Error sending face descriptor:', error);
+    }
+  };
 
+
+  const getLabelFaceDescriptor = async () => {
+    const labeledDescriptors = await Promise.all(
+      profile.map(async (user) => {
+        const descriptions = [];
+        const imageResponse = await fetch(REACT_API_BASE_URL + user.picture);
+        const imageBlob = await imageResponse.blob();
+        const image = await faceapi.bufferToImage(imageBlob);
+  
+        const detection = await faceapi.detectSingleFace(image, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks()
+          .withFaceDescriptor();
+  
+        if (detection) {
+          descriptions.push(detection.descriptor);
+        }
+  
+        return new faceapi.LabeledFaceDescriptors(user.contact, descriptions);
+      })
+    );
+  
+    return labeledDescriptors;
+  };
+  
+
+  // const getLabelFaceDescriptor = () => {
+  //   Promise.all(
+  //     profile.map( async (user) => {
+  //       const descriptions = [];
+  //         const image = await faceapi.fetchImage(REACT_API_BASE_URL + user.picture)
+  //         const detection = faceapi.detectSingleFace(sabs, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
+  //         descriptions.push(detection.descriptor);
+  //         console.log(detection)
+
+  //         return new faceapi.LabeledFaceDescriptors(user, descriptions)
+  //     })
+  //   )
+  // }
 
 
   return (
@@ -121,22 +220,29 @@ export default function AttendancePage() {
             <span>{initializing ? 'Initializing' : 'Capturing'}  </span>
 
             <div className='videoCapture displayFlex'>
-              {/* <video
-                // component='video'
-                crossOrigin='anonymous'
-                height={videoHight}
-                width={videoWidth}
-                // onPlay={handleVideoPlay}
-                autoPlay
-                muted
-                ref={videoRef}
-              /> */}
-              {/* <canvas className='videoCapture' ref={canvasRef} /> */}
 
               <video ref={videoRef} height={videoHight} width={videoWidth} autoPlay />
               <canvas ref={canvasRef} className='videoCapture' />
-            </div>
 
+            </div>
+            {
+              startVideo ?
+                <>
+                  <Button
+                    color='error'
+                    variant="contained"
+                    onClick={stopStream}>
+                    Stop
+                  </Button>
+                  {
+                    profile.map((user) => {
+                      return(
+                        <p>{user.contact}</p>
+                      )
+                    })
+                  }
+                </> : ''
+            }
 
 
 

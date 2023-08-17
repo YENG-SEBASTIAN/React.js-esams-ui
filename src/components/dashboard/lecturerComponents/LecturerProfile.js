@@ -79,7 +79,7 @@ export default function LecturerProfile() {
                 image={REACT_API_BASE_URL + profile.picture}
                 alt={user.fullName}
                 height={300}
-                width={300}
+                width={400}
               />
             </Grid>
 
@@ -94,6 +94,9 @@ export default function LecturerProfile() {
                     </Title>
                     <Title>
                       <h6>Role: {user.role}</h6>
+                    </Title>
+                    <Title>
+                      <h6>Role: {user.level}</h6>
                     </Title>
                     <Title>
                       <h6>Name: {user.fullName}</h6>
@@ -114,6 +117,7 @@ export default function LecturerProfile() {
 
                     {
                       profile ? <UpdateProfilleModal /> : <SetProfileModal />
+                      // <SetProfileModal />
                     }
 
                   </Grid>

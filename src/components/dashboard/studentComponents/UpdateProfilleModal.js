@@ -24,6 +24,7 @@ export default function UpdateProfilleModal() {
 
     const [query, setQuery] = React.useState({
         programme: "",
+        level: "",
         contact: "",
         about: "",
         picture: ""
@@ -53,11 +54,12 @@ export default function UpdateProfilleModal() {
         };
         const userData = {
             programme: query.programme,
-            contact: query.contact,
+            level: query.level,
             about: query.about,
+            contact: query.contact,
             picture: picture[0]
         }
-        await axios.put(USERS_API_BASE_URL + `updateProfile/`, userData, config)
+        await axios.put(USERS_API_BASE_URL + `updateProfileInfo/`, userData, config)
             .then(res => res.data)
             .catch(err => console.log(err))
         handleClose();
@@ -90,6 +92,7 @@ export default function UpdateProfilleModal() {
                 aria-describedby="alert-dialog-slide-description"
             >
                 <DialogTitle>{"Enter course details"}</DialogTitle>
+
                 <DialogContent>
                     <DialogContentText id="alert-dialog-slide-description">
                         <TextField
@@ -108,13 +111,14 @@ export default function UpdateProfilleModal() {
                             margin="normal"
                             required
                             fullWidth
-                            name="contact"
-                            label="Mobile Number"
-                            id="contact"
-                            value={query.contact}
+                            name="level"
+                            label="Level"
+                            id="level"
+                            value={query.level}
                             onChange={handleUpdateChange}
 
                         />
+
 
                         <TextField
                             margin="normal"
@@ -133,6 +137,17 @@ export default function UpdateProfilleModal() {
                             margin="normal"
                             required
                             fullWidth
+                            name="contact"
+                            label="Mobile Number"
+                            value={query.contact}
+                            onChange={handleUpdateChange}
+
+                        />
+
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
                             name="picture"
                             label="Upload a picture with your full face"
                             id="picture"
@@ -142,6 +157,7 @@ export default function UpdateProfilleModal() {
                         />
                     </DialogContentText>
                 </DialogContent>
+
                 <DialogActions>
                     <Button
                         color='error'
