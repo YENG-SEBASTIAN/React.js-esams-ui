@@ -22,7 +22,7 @@ import { mainListItems, secondaryListItems } from './SideBar';
 import Chart from './Chart';
 import DisplayRole from './DisplayRole';
 import Orders from './Orders';
-import { useNavigate, Routes, Route } from 'react-router-dom';
+import { useNavigate, Routes, Route, Navigate } from 'react-router-dom';
 
 import { connect } from 'react-redux';
 import { checkAuthenticated, logout } from '../../../actions/auth';
@@ -39,6 +39,7 @@ import TakeAttendace from '../lecturerComponents/TakeAttendace';
 import Report from '../lecturerComponents/Report';
 import LecturerProfile from '../lecturerComponents/LecturerProfile';
 import AttendancePage from '../lecturerComponents/AttendancePage';
+import MarkAttendance from '../lecturerComponents/MarkAttendance';
 import UpdateLectureCourse from '../lecturerComponents/UpdateLectureCourse';
 import { USERS_API_BASE_URL } from '../../../actions/types';
 import axios from 'axios';
@@ -109,7 +110,7 @@ const Dashboard = ({ checkAuthenticated, logout }) => {
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(true);
   const [loggedOut, setLoggedOut] = React.useState(false);
-  const [user, setUser] = React.useState([]);
+  const [userType, setUserType] = React.useState(null);
 
 
   const toggleDrawer = () => {
@@ -131,21 +132,24 @@ const Dashboard = ({ checkAuthenticated, logout }) => {
     }
   }
 
-  const userInfo = async () => {
+
+  const userTypeInfo = async () => {
     const config = {
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `JWT ${localStorage.getItem("access")}`,
-        "accept": "application/json"
-      }
+        'Authorization': `JWT ${localStorage.getItem('access')}`,
+      },
     };
-    await axios.get(USERS_API_BASE_URL + `getUser/`, config)
-      .then(res => setUser(res.data))
-  }
+    try {
+      const response = await axios.get(USERS_API_BASE_URL + 'getUser/', config);
+      setUserType(response.data);
+    } catch (error) {
+      console.error('Error fetching user profile info:', error);
+    }
+  };
 
   React.useEffect(() => {
-    userInfo();
-  }, [])
+    userTypeInfo();
+  }, []);
 
   if (loggedOut) {
     return navigate("/")
@@ -210,17 +214,17 @@ const Dashboard = ({ checkAuthenticated, logout }) => {
           </Toolbar>
           <Divider />
           <List component="nav">
-            {/* {
-              user.role === 'Student' ?
+            {
+              userType && userType.role === 'Student' ?
                 <>
                   {mainListItems}
                 </> : <>
                   {secondaryListItems}
                 </>
-            } */}
-            {mainListItems}
+            }
+            {/* {mainListItems}
             <Divider sx={{ my: 1 }} />
-            {secondaryListItems}
+            {secondaryListItems} */}
           </List>
         </Drawer>
         <Box
@@ -253,6 +257,12 @@ const Dashboard = ({ checkAuthenticated, logout }) => {
 
                     {/* students routes */}
                     <Route path='/' exact element={<SudentDashboard />} />
+                    {/* {
+                      checkAuthenticated ? 
+                      <>
+                      
+                      </> :''
+                    } */}
                     <Route path='/student' exact element={<Student />} />
                     <Route path='/attendance' exact element={<StudentAttendance />} />
                     <Route path='/report' exact element={<StudentReport />} />
@@ -266,6 +276,7 @@ const Dashboard = ({ checkAuthenticated, logout }) => {
                     <Route path='/lecturerReport' exact element={<Report />} />
                     <Route path='/lecturerProfile' exact element={<LecturerProfile />} />
                     <Route path='/attendancePage' exact element={<AttendancePage />} />
+                    <Route path='/MarkAttendance' exact element={<MarkAttendance />} />
                     <Route path='/updateLceturerCourse/:id' exact element={<UpdateLectureCourse />} />
 
                   </Routes>

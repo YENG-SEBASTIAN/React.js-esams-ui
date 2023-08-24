@@ -116,8 +116,8 @@ export default function LecturerProfile() {
                     {/* </Item> */}
 
                     {
-                      profile ? <UpdateProfilleModal /> : <SetProfileModal />
-                      // <SetProfileModal />
+                      // profile ? <UpdateProfilleModal /> : <SetProfileModal />
+                      <SetProfileModal />
                     }
 
                   </Grid>

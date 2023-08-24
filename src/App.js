@@ -18,7 +18,7 @@ function App() {
         {/* public routes */}
         <Route path='/' exact element={<Login />} />
         <Route path='/signup' exact element={<SignUp />} />
-        <Route path='/activate/:uid/:token' exact element={<Activate />} />
+        <Route path='//activate/:uid/:token' exact element={<Activate />} />
         <Route path='/reset-password' exact element={<ResetPassword />} />
         <Route path='password/reset/confirm/:uid/:token' exact element={<ResetPasswordConfirm />} />
 

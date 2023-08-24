@@ -10,10 +10,14 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+
 import { useState, useEffect } from 'react';
 import validation from './validation/validation';
 import { useNavigate } from 'react-router-dom';
-
+import axios from 'axios';
+import { USERS_API_BASE_URL } from '../../actions/types';
 import { connect } from 'react-redux';
 import { login, load_user } from '../../actions/auth';
 
@@ -40,47 +44,80 @@ const Login = ({ login, load_user }) => {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [loggedIn, setLoggedIn] = useState(false);
-
-
   const [email, setEmail] = useState('');
-  const [validEmail, setValidEmail] = useState(false)
-
+  const [validEmail, setValidEmail] = useState(false);
   const [password, setPassword] = useState('');
-  const [validPassword, setValidPassword] = useState(false)
+  const [validPassword, setValidPassword] = useState(false);
+  const [userType, setUserType] = useState(null);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertSeverity, setAlertSeverity] = useState('success'); // 'success' or 'error'
+  const [alertMessage, setAlertMessage] = useState('');
 
 
+  const userTypeInfo = async () => {
+    const config = {
+      headers: {
+        'Authorization': `JWT ${localStorage.getItem('access')}`,
+      },
+    };
+    try {
+      const response = await axios.get(USERS_API_BASE_URL + 'getUser/', config);
+      setUserType(response.data);
+    } catch (error) {
+      console.error('Error fetching user profile info:', error);
+    }
+  };
+
+  useEffect(() => {
+    userTypeInfo();
+  }, []);
 
   useEffect(() => {
     const result = EMAIL_REG.test(email);
     setValidEmail(result);
-  }, [email])
+  }, [email]);
 
   useEffect(() => {
     const result = PASSWORD_REG.test(password);
     setValidPassword(result);
-  }, [password])
+  }, [password]);
 
   useEffect(() => {
     setErrors({});
-  }, [email, password])
+  }, [email, password]);
 
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const formData = { email, password }
-    if (validEmail === true && validPassword === true) {
-      login(email, password);
-      setLoggedIn(true);
-      setEmail('');
-      setPassword('');
-      return navigate("/dashboard/")
+    const formData = { email, password };
 
-      
+    if (validEmail && validPassword) {
+      try {
+        await login(email, password);
+        setLoggedIn(true);
+        setEmail('');
+        setPassword('');
+
+        if (userType && userType.role === 'Student') {
+          return navigate("dashboard/");
+        } else {
+          return navigate("dashboard/dashboard/");
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        setErrors(validation(formData));
+        setAlertSeverity('error');
+        setAlertMessage('Login failed. Please check your credentials.');
+        setAlertOpen(true);
+      }
     } else {
       setErrors(validation(formData));
-      return  navigate("/")
+      setAlertSeverity('error');
+      setAlertMessage('Invalid email or password.');
+      setAlertOpen(true);
     }
   };
+
 
 
 
@@ -105,6 +142,12 @@ const Login = ({ login, load_user }) => {
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
+          {alertOpen && (
+            <Alert severity={alertSeverity} onClose={() => setAlertOpen(false)}>
+              <AlertTitle>{alertSeverity === 'success' ? 'Success' : 'Error'}</AlertTitle>
+              {alertMessage}
+            </Alert>
+          )}
           <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
             <TextField
               margin="normal"
