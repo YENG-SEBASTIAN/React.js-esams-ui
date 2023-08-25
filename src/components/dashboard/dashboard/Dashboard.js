@@ -38,7 +38,6 @@ import Lecturer from '../lecturerComponents/Lecturer';
 import TakeAttendace from '../lecturerComponents/TakeAttendace';
 import Report from '../lecturerComponents/Report';
 import LecturerProfile from '../lecturerComponents/LecturerProfile';
-import AttendancePage from '../lecturerComponents/AttendancePage';
 import MarkAttendance from '../lecturerComponents/MarkAttendance';
 import UpdateLectureCourse from '../lecturerComponents/UpdateLectureCourse';
 import { USERS_API_BASE_URL } from '../../../actions/types';
@@ -275,7 +274,6 @@ const Dashboard = ({ checkAuthenticated, logout }) => {
                     <Route path='/takeAttendance' exact element={<TakeAttendace />} />
                     <Route path='/lecturerReport' exact element={<Report />} />
                     <Route path='/lecturerProfile' exact element={<LecturerProfile />} />
-                    <Route path='/attendancePage' exact element={<AttendancePage />} />
                     <Route path='/MarkAttendance' exact element={<MarkAttendance />} />
                     <Route path='/updateLceturerCourse/:id' exact element={<UpdateLectureCourse />} />
 
