@@ -256,7 +256,7 @@ const Dashboard = ({ checkAuthenticated, logout }) => {
                   <Routes>
 
                     {/* students routes */}
-                    <Route path='/' exact element={<SudentDashboard />} />
+                    <Route path='/studentDashboard' exact element={<SudentDashboard />} />
                     {/* {
                       checkAuthenticated ? 
                       <>

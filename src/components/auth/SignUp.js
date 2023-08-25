@@ -1,6 +1,7 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Link from '@mui/material/Link';
@@ -14,109 +15,92 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-import validation from './validation/validation';
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signup, isAuthenticated } from '../../actions/auth';
-
 import { connect } from 'react-redux';
+import { signup, isAuthenticated } from '../../actions/auth';
+import validation from './validation/validation';
+import Alert from '@mui/material/Alert';
 
-function Copyright(props) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="">
-        eSams.com
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
-
-
-const defaultTheme = createTheme();
-const USERNAME_REG = /^[a-zA-Z0-9]/;
-const FULLNAME_REG = /^[a-zA-Z0-9]/;
-const EMAIL_REG = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*$/;
-const PASSWORD_REG = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
-
-const SignUp = ({ signup, isAuthenticated }) => {
-
+function SignUp({ signup, isAuthenticated }) {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    username: '',
+    fullName: '',
+    email: '',
+    level: 100,
+    role: 'Student',
+    password: '',
+    re_password: '',
+  });
   const [errors, setErrors] = useState({});
-
-  const [username, setUsername] = React.useState('');
-  const [validUsername, setValidUsername] = React.useState(false);
-
-  const [fullName, setFullname] = React.useState('');
-  const [validFullName, setValidFullname] = React.useState(false);
-
-  const [email, setEmail] = React.useState('');
-  const [validEmail, setValidEmail] = React.useState(false);
-
-  const [level, setLevel] = React.useState(100);
-  const [role, setRole] = React.useState('Student');
-
-  const [password, setPassword] = useState('');
-  const [validPassword, setValidPassword] = useState(false);
-
-  const [re_password, setRePassword] = useState('');
-  const [validRe_password, setValidRePassword] = useState(false);
-
+  const [signingUp, setSigningUp] = useState(false);
   const [accountCreated, setAccountCreated] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertSeverity, setAlertSeverity] = useState('success');
+  const [alertMessage, setAlertMessage] = useState('');
 
-  useEffect(() => {
-    const result = USERNAME_REG.test(username);
-    setValidUsername(result);
-  }, [username])
+  const defaultTheme = createTheme();
+  const USERNAME_REG = /^[a-zA-Z0-9]/;
+  const FULLNAME_REG = /^[a-zA-Z0-9]/;
+  const EMAIL_REG = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*$/;
+  const PASSWORD_REG = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 
-  useEffect(() => {
-    const result = FULLNAME_REG.test(fullName);
-    setValidFullname(result);
-  }, [fullName])
-
-  useEffect(() => {
-    const result = EMAIL_REG.test(email);
-    setValidEmail(result);
-  }, [email])
-
-  useEffect(() => {
-    const result = PASSWORD_REG.test(password);
-    setValidPassword(result);
-  }, [password])
-
-  useEffect(() => {
-    const result = PASSWORD_REG.test(re_password);
-    setValidRePassword(result);
-  }, [re_password])
-
-  useEffect(() => {
-    setErrors({});
-  }, [username, fullName, email, password, re_password])
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const formData = { username, fullName, email, level, role, password, re_password }
-    if (validUsername === true && validFullName === true
-      && validEmail === true && validPassword === true &&
-      validRe_password === true) {
-      signup(username.toUpperCase(), fullName, email, level, role, password, re_password)
-    } else {
-      setErrors(validation(formData))
-    }
-
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: value
+    }));
   };
 
-  if (isAuthenticated) {
-    return navigate("/");
-  }
-  
-  if (accountCreated) {
-    return navigate("/")
-  }
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const formData = { username, fullName, email, level, role, password, re_password };
 
+    if (
+      validUsername &&
+      validFullName &&
+      validEmail &&
+      validPassword &&
+      validRe_password
+    ) {
+      setSigningUp(true); // Show circular progress
 
+      try {
+        const response = await signup(username.toUpperCase(), fullName, email, level, role, password, re_password);
+
+        if (response.success) {
+          setAccountCreated(true);
+          setAlertSeverity('success');
+          setAlertMessage(response.message); // Use Django server's success message
+        } else {
+          setErrors(validation(formData));
+          setAlertSeverity('error');
+          setAlertMessage(response.message); // Use Django server's error message
+        }
+      } catch (error) {
+        console.error('Signup error:', error);
+        setAlertSeverity('error');
+        setAlertMessage('An error occurred. Please try again later.');
+      } finally {
+        setSigningUp(false); // Hide circular progress
+        setAlertOpen(true); // Display the alert
+      }
+    } else {
+      setErrors(validation(formData));
+      setAlertSeverity('error');
+      setAlertMessage('Invalid input. Please check your inputs.');
+      setAlertOpen(true); // Display the alert
+    }
+  };
+
+  const { username, fullName, email, level, role, password, re_password } = formData;
+
+  const validUsername = USERNAME_REG.test(username);
+  const validFullName = FULLNAME_REG.test(fullName);
+  const validEmail = EMAIL_REG.test(email);
+  const validPassword = PASSWORD_REG.test(password);
+  const validRe_password = PASSWORD_REG.test(re_password);
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -131,7 +115,7 @@ const SignUp = ({ signup, isAuthenticated }) => {
           }}
         >
           <Typography component="h1" variant="h5">
-            E-Smart Attendance
+            Smart E-Attendance
           </Typography>
           <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
             <LockOutlinedIcon />
@@ -139,6 +123,16 @@ const SignUp = ({ signup, isAuthenticated }) => {
           <Typography component="h1" variant="h5">
             Sign up
           </Typography>
+          {/* Display Alert */}
+          {alertOpen && (
+            <Alert
+              severity={alertSeverity}
+              onClose={() => setAlertOpen(false)}
+              sx={{ mt: 2 }}
+            >
+              {alertMessage}
+            </Alert>
+          )}
           <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
@@ -149,7 +143,8 @@ const SignUp = ({ signup, isAuthenticated }) => {
                   label="Index Number/Lecturer ID"
                   name="username"
                   autoComplete="username"
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={username}
+                  onChange={handleChange}
                   helperText={errors.username}
                   error={errors.username}
                 />
@@ -162,7 +157,8 @@ const SignUp = ({ signup, isAuthenticated }) => {
                   label="Full Name"
                   name="fullName"
                   autoComplete="fullName"
-                  onChange={(e) => setFullname(e.target.value)}
+                  value={fullName}
+                  onChange={handleChange}
                   helperText={errors.fullName}
                   error={errors.fullName}
                 />
@@ -175,12 +171,12 @@ const SignUp = ({ signup, isAuthenticated }) => {
                   label="Email Address"
                   name="email"
                   autoComplete="email"
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={email}
+                  onChange={handleChange}
                   helperText={errors.email}
                   error={errors.email}
                 />
               </Grid>
-
               <Grid item xs={6}>
                 <FormControl fullWidth>
                   <InputLabel id="level">Level</InputLabel>
@@ -189,7 +185,8 @@ const SignUp = ({ signup, isAuthenticated }) => {
                     id="level"
                     value={level}
                     label="Level"
-                    onChange={(e) => setLevel(e.target.value)}
+                    name="level"
+                    onChange={handleChange}
                   >
                     <MenuItem value={100}>100</MenuItem>
                     <MenuItem value={200}>200</MenuItem>
@@ -198,7 +195,6 @@ const SignUp = ({ signup, isAuthenticated }) => {
                   </Select>
                 </FormControl>
               </Grid>
-
               <Grid item xs={6}>
                 <FormControl fullWidth>
                   <InputLabel id="role">Role</InputLabel>
@@ -206,15 +202,15 @@ const SignUp = ({ signup, isAuthenticated }) => {
                     labelId="role"
                     id="role"
                     value={role}
-                    label="role"
-                    onChange={(e) => setRole(e.target.value)}
+                    label="Role"
+                    name="role"
+                    onChange={handleChange}
                   >
                     <MenuItem value='Student'>Student</MenuItem>
                     <MenuItem value='Lecturer'>Lecturer</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
-
               <Grid item xs={6}>
                 <TextField
                   required
@@ -223,7 +219,8 @@ const SignUp = ({ signup, isAuthenticated }) => {
                   label="Password"
                   type="password"
                   id="password"
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={password}
+                  onChange={handleChange}
                   helperText={errors.password}
                   error={errors.password}
                 />
@@ -236,7 +233,8 @@ const SignUp = ({ signup, isAuthenticated }) => {
                   label="Confirm Password"
                   type="password"
                   id="re_password"
-                  onChange={(e) => setRePassword(e.target.value)}
+                  value={re_password}
+                  onChange={handleChange}
                   helperText={errors.re_password}
                   error={errors.re_password}
                 />
@@ -247,8 +245,9 @@ const SignUp = ({ signup, isAuthenticated }) => {
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+              disabled={signingUp} // Disable the button while signing up
             >
-              Sign Up
+              {signingUp ? <CircularProgress size={24} /> : 'Sign Up'}
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
@@ -259,14 +258,13 @@ const SignUp = ({ signup, isAuthenticated }) => {
             </Grid>
           </Box>
         </Box>
-        <Copyright sx={{ mt: 5 }} />
       </Container>
     </ThemeProvider>
   );
 }
 
 const mapStateToProps = state => ({
-  isAuthenticated: state.auth.isAuthenticated
+  isAuthenticated: state.auth.isAuthenticated,
 });
 
-export default connect(mapStateToProps, {signup})(SignUp);
+export default connect(mapStateToProps, { signup })(SignUp);

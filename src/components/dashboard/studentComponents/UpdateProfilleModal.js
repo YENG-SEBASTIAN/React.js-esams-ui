@@ -1,5 +1,4 @@
-
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -12,167 +11,153 @@ import axios from 'axios';
 import { USERS_API_BASE_URL } from '../../../actions/types';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
+  return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function UpdateProfilleModal() {
+export default function UpdateProfileModal() {
+  const [open, setOpen] = useState(false);
+  const [picture, setPicture] = useState(null);
+  const [query, setQuery] = useState({
+    programme: '',
+    level: '',
+    contact: '',
+    about: '',
+    picture: '',
+  });
 
-    const [open, setOpen] = React.useState(false);
+  const handleUpdateChange = (e) => {
+    const { name, value } = e.target;
+    setQuery((prevQuery) => ({
+      ...prevQuery,
+      [name]: value,
+    }));
+  };
 
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
 
-    const [picture, setPicture] = React.useState(null);
+  const handleClose = () => {
+    setOpen(false);
+  };
 
-    const [query, setQuery] = React.useState({
-        programme: "",
-        level: "",
-        contact: "",
-        about: "",
-        picture: ""
-    })
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('programme', query.programme);
+    formData.append('level', query.level);
+    formData.append('about', query.about);
+    formData.append('contact', query.contact);
+    formData.append('picture', picture[0]);
 
-    const handleUpdateChange = async (e) => {
-        const queryClone = { ...query };
-        queryClone[e.target.name] = e.target.value;
-        setQuery(queryClone)
-    }
-
-    const handleClickOpen = () => {
-        setOpen(true);
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `JWT ${localStorage.getItem('access')}`,
+      },
     };
 
-    const handleClose = () => {
-        setOpen(false);
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const config = {
-            headers: {
-                "Content-Type": "multipart/form-data",
-                "Authorization": `JWT ${localStorage.getItem("access")}`,
-            }
-        };
-        const userData = {
-            programme: query.programme,
-            level: query.level,
-            about: query.about,
-            contact: query.contact,
-            picture: picture[0]
-        }
-        await axios.put(USERS_API_BASE_URL + `updateProfileInfo/`, userData, config)
-            .then(res => res.data)
-            .catch(err => console.log(err))
-        handleClose();
-
+    try {
+      await axios.put(USERS_API_BASE_URL + 'updateProfileInfo/', formData, config);
+      handleClose();
+    } catch (error) {
+      console.error('Update profile error:', error);
     }
+  };
 
-    React.useEffect(() => {
-        const fetchUserProfile = async () => {
-            const config = {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                    "Authorization": `JWT ${localStorage.getItem("access")}`,
-                }
-            };
-            await axios.get(USERS_API_BASE_URL + `getProfile/`, config)
-                .then(res => setQuery(res.data))
-        }
-        fetchUserProfile();
-    }, [])
-    return (
-        <div>
-            <Button variant="outlined" onClick={handleClickOpen}>
-                Update Profile
-            </Button>
-            <Dialog
-                open={open}
-                TransitionComponent={Transition}
-                keepMounted
-                onClose={handleClose}
-                aria-describedby="alert-dialog-slide-description"
-            >
-                <DialogTitle>{"Enter course details"}</DialogTitle>
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const config = {
+        headers: {
+          Authorization: `JWT ${localStorage.getItem('access')}`,
+        },
+      };
+      try {
+        const response = await axios.get(USERS_API_BASE_URL + 'getProfile/', config);
+        setQuery(response.data);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
+    fetchUserProfile();
+  }, []);
 
-                <DialogContent>
-                    <DialogContentText id="alert-dialog-slide-description">
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="programme"
-                            label="Programe of study"
-                            id="programme"
-                            value={query.programme}
-                            onChange={handleUpdateChange}
-
-                        />
-
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="level"
-                            label="Level"
-                            id="level"
-                            value={query.level}
-                            onChange={handleUpdateChange}
-
-                        />
-
-
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="about"
-                            label="About"
-                            multiline
-                            id="about"
-                            value={query.about}
-                            onChange={handleUpdateChange}
-
-                        />
-
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="contact"
-                            label="Mobile Number"
-                            value={query.contact}
-                            onChange={handleUpdateChange}
-
-                        />
-
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="picture"
-                            label="Upload a picture with your full face"
-                            id="picture"
-                            type='file'
-                            onChange={(e) => setPicture(e.target.files)}
-
-                        />
-                    </DialogContentText>
-                </DialogContent>
-
-                <DialogActions>
-                    <Button
-                        color='error'
-                        variant="contained"
-                        onClick={handleClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        onClick={handleSubmit}>
-                        Submit
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </div>
-    );
+  return (
+    <div>
+      <Button variant="outlined" onClick={handleClickOpen}>
+        Update Profile
+      </Button>
+      <Dialog
+        open={open}
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={handleClose}
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle>{"Update profile"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="programme"
+              label="Program of study"
+              id="programme"
+              value={query.programme}
+              onChange={handleUpdateChange}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="level"
+              label="Level"
+              id="level"
+              value={query.level}
+              onChange={handleUpdateChange}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="about"
+              label="About"
+              multiline
+              id="about"
+              value={query.about}
+              onChange={handleUpdateChange}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="contact"
+              label="Mobile Number"
+              value={query.contact}
+              onChange={handleUpdateChange}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="picture"
+              label="Upload a picture with your full face"
+              id="picture"
+              type="file"
+              onChange={(e) => setPicture(e.target.files)}
+            />
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button color="error" variant="contained" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button type="submit" variant="contained" onClick={handleSubmit}>
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  );
 }

@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom'
 
 export const mainListItems = (
   <React.Fragment>
-    <Link to='/dashboard/'>
+    <Link to='/dashboard/studentDashboard'>
       <ListItemButton>
         <ListItemIcon>
           <DashboardIcon />
@@ -65,9 +65,6 @@ export const mainListItems = (
 
 export const secondaryListItems = (
   <React.Fragment>
-    <ListSubheader component="div" inset>
-      Saved reports
-    </ListSubheader>
     <Link to='/dashboard/dashboard'>
       <ListItemButton>
         <ListItemIcon>

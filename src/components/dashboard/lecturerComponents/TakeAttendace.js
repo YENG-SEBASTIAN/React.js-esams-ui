@@ -34,39 +34,24 @@ export default function TakeAttendace() {
     setOpen(false);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = { courseCode, courseName };
     if (courseCode !== "" && courseName !== "") {
-      invigilator_add_courses(courseCode, courseName);
-      console.log(formData);
+      await invigilator_add_courses(courseCode, courseName);
       handleClose()
-      return navigate("/dashboard/attendancePage")
+      return navigate("/dashboard/MarkAttendance")
     } else {
       setErrors(validation(formData));
     }
 
   }
 
-  const markAttendance = async () => {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `JWT ${localStorage.getItem("access")}`,
-        "accept": "application/json"
-      }
-    };
-    await axios.get(USERS_API_BASE_URL + `recognize/`, config)
-      .catch(err => console.log(err))
-  }
 
   return (
     <div>
       <Button variant="outlined" onClick={handleClickOpen}>
         Take Students Attendance
-      </Button>
-      <Button variant="contained" onClick={markAttendance}>
-        Mark Attendance
       </Button>
       <Dialog
         open={open}

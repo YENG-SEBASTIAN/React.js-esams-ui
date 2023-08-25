@@ -67,7 +67,6 @@ export default function Student() {
                 label="Course Name"
                 name="courseName"
                 autoComplete="courseName"
-                autoFocus
               onChange={(e) => setCourseName(e.target.value)}
               />
               <TextField

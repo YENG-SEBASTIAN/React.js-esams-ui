@@ -1,5 +1,4 @@
-
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -8,56 +7,82 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Title from '../dashboard/Title';
+import CircularProgress from '@mui/material/CircularProgress';
 import axios from 'axios';
 import { update_sudent_courses } from './studentService/service';
 import { useNavigate, useParams } from 'react-router-dom';
 import { STUDENTS_API_BASE_URL } from '../../../actions/types';
 
-
 const defaultTheme = createTheme();
 
 export default function UpdateCourse() {
-
   const navigate = useNavigate();
   const params = useParams();
 
-  const [query, setQuery] = React.useState({
-    courseName: "",
-    courseCode: "",
-    creditHours: "",
-    lecturerID: ""
-  })
+  const [query, setQuery] = useState({
+    courseName: '',
+    courseCode: '',
+    creditHours: '',
+    lecturerID: '',
+  });
+  const [updating, setUpdating] = useState(false);
 
-  const handleUpdateChange = async (e) => {
-    const queryClone = { ...query };
-    queryClone[e.target.name] = e.target.value;
-    setQuery(queryClone)
-  }
+  const handleUpdateChange = (e) => {
+    const { name, value } = e.target;
+    setQuery((prevQuery) => ({
+      ...prevQuery,
+      [name]: value,
+    }));
+  };
 
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (query.courseName !== "" && query.courseCode !== "" && query.creditHours !== "" && query.lecturerID !== "") {
-      update_sudent_courses(params.id, query.courseName, query.courseCode, query.creditHours, query.lecturerID)
-      return navigate("/dashboard/")
+
+    if (
+      query.courseName !== '' &&
+      query.courseCode !== '' &&
+      query.creditHours !== '' &&
+      query.lecturerID !== ''
+    ) {
+      setUpdating(true); // Show circular progress
+      try {
+        await update_sudent_courses(
+          params.id,
+          query.courseName,
+          query.courseCode,
+          query.creditHours,
+          query.lecturerID
+        );
+        setUpdating(false); // Hide circular progress
+        return navigate('/dashboard/studentDashboard');
+      } catch (error) {
+        console.error('Update course error:', error);
+        setUpdating(false); // Hide circular progress on error
+      }
     }
+  };
 
-  }
-
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchCourses = async () => {
       const config = {
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `JWT ${localStorage.getItem("access")}`,
-          "accept": "application/json"
-        }
+          'Content-Type': 'application/json',
+          Authorization: `JWT ${localStorage.getItem('access')}`,
+          accept: 'application/json',
+        },
       };
-      await axios.get(STUDENTS_API_BASE_URL + `getCourse/${params.id}/`, config)
-        .then(res => setQuery(res.data))
-    }
+      try {
+        const response = await axios.get(
+          STUDENTS_API_BASE_URL + `getCourse/${params.id}/`,
+          config
+        );
+        setQuery(response.data);
+      } catch (error) {
+        console.error('Error fetching course:', error);
+      }
+    };
     fetchCourses();
-  })
+  }, [params.id]);
 
   return (
     <React.Fragment>
@@ -84,7 +109,6 @@ export default function UpdateCourse() {
                 label="Course Name"
                 name="courseName"
                 autoComplete="courseName"
-                autoFocus
                 value={query.courseName}
                 onChange={handleUpdateChange}
               />
@@ -98,7 +122,6 @@ export default function UpdateCourse() {
                 id="courseCode"
                 value={query.courseCode}
                 onChange={handleUpdateChange}
-
               />
               <TextField
                 margin="normal"
@@ -107,7 +130,7 @@ export default function UpdateCourse() {
                 name="creditHours"
                 label="Credit Hours"
                 id="creditHours"
-                type='number'
+                type="number"
                 value={query.creditHours}
                 onChange={handleUpdateChange}
               />
@@ -126,8 +149,9 @@ export default function UpdateCourse() {
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
+                disabled={updating} // Disable the button while updating
               >
-                Update Course
+                {updating ? <CircularProgress size={24} /> : 'Update Course'}
               </Button>
             </Box>
           </Box>

@@ -5,6 +5,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Title from '../dashboard/Title';
 import axios from 'axios';
 import * as faceapi from 'face-api.js';
 import { USERS_API_BASE_URL } from '../../../actions/types';
@@ -131,7 +132,7 @@ export default function AttendancePage() {
         },
         config
       );
-     console.log(response.data)
+      console.log(response.data)
     } catch (error) {
       console.error('Error sending face descriptor:', error);
     }
@@ -151,7 +152,7 @@ export default function AttendancePage() {
             }}
           >
             <Typography component="h1" variant="h5">
-              Take Attendance
+              <Title>Take Attendance</Title>
             </Typography>
 
             <div className='videoCapture displayFlex'>

@@ -53,26 +53,32 @@ export default function SetProfileModal() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const config = {
+      
+        try {
+          const config = {
             headers: {
-                "Content-Type": "multipart/form-data",
-                "Authorization": `JWT ${localStorage.getItem("access")}`,
+              "Content-Type": "multipart/form-data",
+              "Authorization": `JWT ${localStorage.getItem("access")}`,
             }
-        };
-        const userData = {
+          };
+          const userData = {
             programme: formInput.programme,
             level: formInput.level,
             about: formInput.about,
             contact: formInput.contact,
             picture: picture[0]
+          };
+          
+          await axios.post(USERS_API_BASE_URL + `SetProfileInfo/`, userData, config);
+          
+          console.log(userData);
+          handleClose();
+        } catch (error) {
+          console.error("Error submitting form:", error);
+          // Handle the error here, e.g., show an error message to the user
         }
-        await axios.post(USERS_API_BASE_URL + `SetProfileInfo/`, userData, config)
-            .then(res => res.data)
-            .catch(err => console.log(err))
-
-        console.log(userData);
-        handleClose();
-    }
+      };
+      
 
     return (
         <div>
@@ -86,7 +92,7 @@ export default function SetProfileModal() {
                 onClose={handleClose}
                 aria-describedby="alert-dialog-slide-description"
             >
-                <DialogTitle>{"Enter course details"}</DialogTitle>
+                <DialogTitle>{"Enter profile details"}</DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-slide-description">
                         <TextField

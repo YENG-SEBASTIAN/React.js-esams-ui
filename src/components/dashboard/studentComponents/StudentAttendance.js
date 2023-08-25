@@ -6,6 +6,10 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Title from '../dashboard/Title';
+import axios from 'axios';
+import { STUDENTS_API_BASE_URL } from '../../../actions/types';
+
+
 
 function createData(id, indexBumber, courseCode, courseName, atendanceTime, isPresent) {
   return { id, indexBumber, courseCode, courseName, atendanceTime, isPresent };
@@ -49,6 +53,26 @@ const rows = [
 
 
 export default function StudentAttendance() {
+
+  const [attendace, setAttendance] = React.useState([])
+
+  const load_student_attendance = async () => {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `JWT ${localStorage.getItem("access")}`,
+        "accept": "application/json"
+      }
+    };
+    await axios.get(STUDENTS_API_BASE_URL + `getAttendance/`, config)
+      .then(res => setAttendance(res.data))
+  };
+
+  React.useEffect(() => {
+    load_student_attendance();
+  }, [])
+
+
   return (
     <React.Fragment>
       <Title>Attendance</Title>
@@ -63,13 +87,17 @@ export default function StudentAttendance() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
+          {attendace.map((row) => (
             <TableRow key={row.id}>
-              <TableCell>{row.indexBumber}</TableCell>
+              <TableCell>{row.indexNumber}</TableCell>
               <TableCell>{row.courseCode}</TableCell>
               <TableCell>{row.courseName}</TableCell>
-              <TableCell>{row.atendanceTime}</TableCell>
-              <TableCell align="right">{row.isPresent}</TableCell>
+              <TableCell>
+                {
+                  new Date(row.attendace).toLocaleDateString()
+                }
+                </TableCell>
+              <TableCell align="right">{row.isPresent ? 'Present' : 'Absent'}</TableCell>
             </TableRow>
           ))}
         </TableBody>

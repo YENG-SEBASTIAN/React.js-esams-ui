@@ -1,24 +1,18 @@
-
-
 import * as React from 'react';
-import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
+import { useEffect, useState } from 'react';
+import CardMedia from '@mui/material/CardMedia';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
-import CardMedia from '@mui/material/CardMedia';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import Title from '../dashboard/Title';
-import axios from 'axios';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { USERS_API_BASE_URL, REACT_API_BASE_URL } from '../../../actions/types';
+import axios from 'axios';
 import styled from '@emotion/styled';
 import SetProfileModal from '../studentComponents/SetProfileModal';
 import UpdateProfilleModal from '../studentComponents/UpdateProfilleModal';
 
 const defaultTheme = createTheme();
 
-const Item = styled(Paper)(({ theme }) => ({
+const Item = styled(Grid)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
   ...theme.typography.body2,
   padding: theme.spacing(1),
@@ -27,106 +21,76 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 export default function LecturerProfile() {
+  const [user, setUser] = useState([]);
+  const [profile, setProfile] = useState([]);
 
-  const [user, setUser] = React.useState([]);
-  const [profile, setProfile] = React.useState([]);
-
-  const userInfo = async () => {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `JWT ${localStorage.getItem("access")}`,
-        "accept": "application/json"
+  useEffect(() => {
+    const userInfo = async () => {
+      try {
+        const response = await axios.get(USERS_API_BASE_URL + 'getUser/', {
+          headers: {
+            Authorization: `JWT ${localStorage.getItem('access')}`,
+          },
+        });
+        setUser(response.data);
+      } catch (error) {
+        console.error('Error fetching user info:', error);
       }
     };
-    await axios.get(USERS_API_BASE_URL + `getUser/`, config)
-      .then(res => setUser(res.data))
-  }
 
-  const userProfile = async () => {
-    const config = {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        "Authorization": `JWT ${localStorage.getItem("access")}`,
+    const userProfile = async () => {
+      try {
+        const response = await axios.get(USERS_API_BASE_URL + 'getProfile/', {
+          headers: {
+            Authorization: `JWT ${localStorage.getItem('access')}`,
+          },
+        });
+        setProfile(response.data);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
       }
     };
-    await axios.get(USERS_API_BASE_URL + `getProfile/`, config)
-      .then(res => setProfile(res.data))
-  }
 
-  React.useEffect(() => {
-    userInfo()
-  }, [])
-
-  React.useEffect(() => {
-    userProfile()
-  }, [])
-
-
+    userInfo();
+    userProfile();
+  }, []);
 
   return (
-    <React.Fragment>
-      <ThemeProvider theme={defaultTheme}>
-        <Container component="main" maxWidth="xs">
-          <CssBaseline />
-          <Grid item>
-
+    <ThemeProvider theme={defaultTheme}>
+      <Container component="main" maxWidth="xs">
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <CardMedia
+              component="img"
+              image={REACT_API_BASE_URL + profile.picture}
+              alt={user.fullName}
+              height={300}
+              width={400}
+            />
           </Grid>
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <CardMedia
-                component='img'
-                image={REACT_API_BASE_URL + profile.picture}
-                alt={user.fullName}
-                height={300}
-                width={400}
-              />
-            </Grid>
-
+          <Grid item xs={6}>
+            <Item>
+              <h6>ID: {user.username}</h6>
+              <h6>Role: {user.role}</h6>
+              <h6>Name: {user.fullName}</h6>
+              <h6>Program: {profile.programme}</h6>
+              <h6>Contact: {profile.contact}</h6>
+              <h6>Email: {user.email}</h6>
+              <h6>About: {profile.about}</h6>
+            </Item>
             {
-              profile || user ?
-
-                <>
-                  <Grid item xs={6}>
-                    {/* <Item> */}
-                    <Title>
-                      <h6>ID: {user.username}</h6>
-                    </Title>
-                    <Title>
-                      <h6>Role: {user.role}</h6>
-                    </Title>
-                    <Title>
-                      <h6>Role: {user.level}</h6>
-                    </Title>
-                    <Title>
-                      <h6>Name: {user.fullName}</h6>
-                    </Title>
-                    <Title>
-                      <h6>Program: {profile.programme}</h6>
-                    </Title>
-                    <Title>
-                      <h6>Contact: {profile.contact}</h6>
-                    </Title>
-                    <Title>
-                      <h6>Email: {user.email}</h6>
-                    </Title>
-                    <Title>
-                      <h6>About: {profile.about}</h6>
-                    </Title>
-                    {/* </Item> */}
-
-                    {
-                      // profile ? <UpdateProfilleModal /> : <SetProfileModal />
-                      <SetProfileModal />
-                    }
-
-                  </Grid>
-                </> : ""
+              profile.length === 0 ? 
+              <> 
+              <SetProfileModal />
+              </> : 
+              <>
+              <UpdateProfilleModal />
+              </>
             }
-
+            
           </Grid>
-        </Container>
-      </ThemeProvider>
-    </React.Fragment>
+        </Grid>
+      </Container>
+    </ThemeProvider>
   );
 }
