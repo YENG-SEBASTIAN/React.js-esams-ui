@@ -101,14 +101,14 @@ export const secondaryListItems = (
       </ListItemButton>
     </Link>
 
-    <Link to='/dashboard/lecturerProfile'>
+    {/* <Link to='/dashboard/lecturerProfile'>
       <ListItemButton>
         <ListItemIcon>
           <AssignmentIndIcon />
         </ListItemIcon>
         <ListItemText primary="Profile" />
       </ListItemButton>
-    </Link>
+    </Link> */}
 
     <Link to='/dashboard/attendancePage'></Link>
     <Link to='/dashboard/updateLceturerCourse/:id'></Link>
