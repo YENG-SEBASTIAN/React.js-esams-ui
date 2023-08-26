@@ -42,7 +42,6 @@ export default function Report() {
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell>Invigilator</TableCell>
             <TableCell>Course Code</TableCell>
             <TableCell>Course Name</TableCell>
             <TableCell>Action</TableCell>
@@ -51,7 +50,6 @@ export default function Report() {
         <TableBody>
           {courses.map((row) => (
             <TableRow key={row.id} style={{cursor:"pointer"}}>
-              <TableCell>{row.invigilatorID.fullName}</TableCell>
               <TableCell>{row.courseCode}</TableCell>
               <TableCell>{row.courseName}</TableCell>
               <TableCell><DownloadModal courseCode={row.courseCode} courseName={row.courseName}/></TableCell>

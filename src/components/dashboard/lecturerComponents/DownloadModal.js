@@ -17,6 +17,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export default function DownloadModal({ courseCode, courseName }) {
   const [open, setOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState('');
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -25,31 +26,38 @@ export default function DownloadModal({ courseCode, courseName }) {
   const handleClose = () => {
     setOpen(false);
   };
+  
 
-  const downloadPDFFile = async () => {
+  const handleDownload = async () => {
     try {
-      setDownloading(true); // Show circular progress
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `JWT ${localStorage.getItem("access")}`,
-          "accept": "application/json"
-        }
-      };
-      await axios.get(LECTURERS_API_BASE_URL + `AttendancePDFReport/${courseCode}/${courseName}/`, config);
-      setDownloading(false); // Hide circular progress
+      const response = await axios.get(`${LECTURERS_API_BASE_URL}GeneratePDFView/${courseCode}/${courseName}/`, {
+        responseType: 'blob', // Important: Set the response type to 'blob'
+      });
+
+      // Create a URL for the blob response
+      const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+      const pdfBlobUrl = URL.createObjectURL(pdfBlob);
+      setPdfUrl(pdfBlobUrl);
+
+      // Trigger the download
+      const link = document.createElement('a');
+      link.href = pdfBlobUrl;
+      link.download = `${courseCode}_attendance.pdf`;;
+      link.click();
+
+      // Clean up the URL after download
+      URL.revokeObjectURL(pdfBlobUrl);
       handleClose();
     } catch (error) {
-      console.error("Error downloading report:", error);
-      // Handle the error here, e.g., show an error message to the user
-      setDownloading(false); // Hide circular progress on error
+      console.error('Error downloading PDF:', error);
     }
   };
 
+
   return (
     <div>
-      <Button variant="outlined" onClick={handleClickOpen}>
-        Attendance report
+      <Button variant="contained" onClick={handleClickOpen}>
+        Report
       </Button>
       <Dialog
         open={open}
@@ -73,7 +81,7 @@ export default function DownloadModal({ courseCode, courseName }) {
           </Button>
           <Button
             variant="contained"
-            onClick={downloadPDFFile}
+            onClick={handleDownload}
             disabled={downloading} // Disable the button while downloading
           >
             {downloading ? <CircularProgress size={24} /> : "Download"}
