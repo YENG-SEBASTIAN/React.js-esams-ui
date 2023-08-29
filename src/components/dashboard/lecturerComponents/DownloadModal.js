@@ -26,7 +26,7 @@ export default function DownloadModal({ courseCode, courseName }) {
   const handleClose = () => {
     setOpen(false);
   };
-  
+
 
   const handleDownload = async () => {
     try {
