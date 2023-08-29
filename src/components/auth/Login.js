@@ -106,17 +106,12 @@ const Login = ({ login, load_user }) => {
         setLoggedIn(true); // Show circular progress
         const response = await login(email, password);
         
-        if (response.success) {
-          userTypeInfo(); // Fetch user type info after successful login
-          handleLoginSuccess('Login Successful'); // Use Django server's success message
-          if (userType && userType.role === 'Student') {
+        if (userType && userType.role === 'Student') {
             return navigate('/dashboard/studentDashboard');
           } else if (userType && userType.role === 'Lecturer') {
             return navigate('/dashboard/dashboard/');
           }
-        } else {
-          handleLoginError('Invalid email or password.'); // error message
-        }
+      
       } catch (error) {
         console.error('Login error:', error);
         setErrors(validation(formData));

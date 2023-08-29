@@ -30,9 +30,15 @@ export default function DownloadModal({ courseCode, courseName }) {
 
   const handleDownload = async () => {
     try {
+      const config = {
+        headers: {
+          "Authorization": `JWT ${localStorage.getItem("access")}`,
+          "accept": "application/pdf"
+        }
+      };
       const response = await axios.get(`${LECTURERS_API_BASE_URL}GeneratePDFView/${courseCode}/${courseName}/`, {
         responseType: 'blob', // Important: Set the response type to 'blob'
-      });
+      }, config);
 
       // Create a URL for the blob response
       const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
