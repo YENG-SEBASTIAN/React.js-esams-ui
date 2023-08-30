@@ -33,24 +33,26 @@ export default function DownloadModal({ courseCode, courseName }) {
       const config = {
         headers: {
           "Authorization": `JWT ${localStorage.getItem("access")}`,
-          "accept": "application/pdf"
         }
       };
-      const response = await axios.get(`${LECTURERS_API_BASE_URL}GeneratePDFView/${courseCode}/${courseName}/`, {
-        responseType: 'blob', // Important: Set the response type to 'blob'
-      }, config);
-
+      const response = await axios.get(
+        `${LECTURERS_API_BASE_URL}GeneratePDFView/${courseCode}/${courseName}/`,
+        {
+          responseType: 'blob', // Important: Set the response type to 'blob'
+          headers: config.headers // Pass the authorization header
+        }
+      );
       // Create a URL for the blob response
       const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
       const pdfBlobUrl = URL.createObjectURL(pdfBlob);
       setPdfUrl(pdfBlobUrl);
-
+  
       // Trigger the download
       const link = document.createElement('a');
       link.href = pdfBlobUrl;
-      link.download = `${courseCode}_attendance.pdf`;;
+      link.download = `${courseCode}_attendance.pdf`;
       link.click();
-
+  
       // Clean up the URL after download
       URL.revokeObjectURL(pdfBlobUrl);
       handleClose();
@@ -58,6 +60,7 @@ export default function DownloadModal({ courseCode, courseName }) {
       console.error('Error downloading PDF:', error);
     }
   };
+  
 
 
   return (
